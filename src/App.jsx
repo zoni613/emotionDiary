@@ -1,25 +1,32 @@
 import './App.css';
-import Register from './components/Resiter';
-import HookExam from './components/HookExam';
+import Home from './pages/Home';
+import New from './pages/New';
+import Diary from './pages/Diary';
+import Notfound from './pages/NotFound';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 
-// Re-Rendering이 일어나느 경어
-// 1. 자신의 state 값 변경
-// 2. props의 값 변경
-// 3. 부모 컴포넌트의 Re-Rendering
-
-
-// 컴포넌트 명은 반드시 첫 글자는 대문자로 작성해야
-// 리액트 내부에서 컴포넌트로 인식됨
 function App() {
+  const nav = useNavigate();
 
-  // Javascript의 일반 변수와는 다르게
-  // state 변수는 변화하면 Re-Rendering이 일어난다.(props도 마찬가지)
-
+  const onClickButton = () => {
+    nav("/new")
+  }
   return (
     <>
-    <HookExam/>
+      <div>
+        <Link to={"/"}>Home</Link>
+        <Link to={"/new"}>New</Link>
+        <Link to={"/diary"}>Diary</Link>
+      </div>
+      <button onClick={onClickButton}>New 페이지로 이동</button>
+      <Routes>
+        <Route path="/" element={<Home/>}></Route>
+        <Route path="/new" element={<New/>}></Route>
+        <Route path="/diary/:id" element={<Diary/>}></Route>
+        <Route path="*" element={<Notfound/>}></Route>
+      </Routes>
     </>
   )
 }
 
-export default App
+export default App;

@@ -1,43 +1,125 @@
 import './App.css';
+import { useReducer, useRef, createContext } from 'react';
 import Home from './pages/Home';
 import New from './pages/New';
 import Diary from './pages/Diary';
+import Edit from './pages/edit';
 import Notfound from './pages/NotFound';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
-import {getEmotionImage} from  './util/get-emiotion-image';
+
+import { Routes, Route } from 'react-router-dom';
+
+const mocData = [
+  {
+    id: 1,
+    createdDate: new Date().getTime(),
+    emotionId: 1,
+    content: "1번 일기 내용",
+  },
+  {
+    id: 2,
+    createdDate: new Date().getTime(),
+    emotionId: 2,
+    content: "2번 일기 내용",
+  },
+];
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'CREATE':
+      return [...state, action.data];
+    case 'UPDATE':
+      return state.map((item) => {
+        return String(item.id) === String(action.data.id) ? action.data : item
+      })
+    case 'DELETE':
+      return state.filter((item) => {
+        return String(item.id) !== String(action.id)
+      })
+    default:
+      return state;
+  }
+}
+
+const DiaryStateContext = createContext();
+const DiaryDispatchContext = createContext();
 
 function App() {
-  const nav = useNavigate();
 
-  const onClickButton = () => {
-    nav("/new")
+  const [data, dispatch] = useReducer(reducer, mocData);
+
+  console.log(data)
+
+  const idRef = useRef(3);
+
+  // 새로운 일기 추가
+  const onCreate = (createdDate, emotionId, content) => {
+    dispatch({
+      type: "CREATE",
+      data: {
+        id: idRef.current++,
+        createdDate,
+        emotionId,
+        content
+      }
+    });
   }
+
+  // 기존 일기 수정
+  const onUpdate = (id, createdDate, emotionId, content) => {
+    dispatch(
+      {
+        type: 'UPDATE',
+        data: {
+          id,
+          createdDate,
+          emotionId,
+          content
+        }
+      }
+    )
+  }
+
+  // 기존 일기 삭제
+  const onDelete = (id) => {
+    dispatch(
+      {
+        type: 'DELETE',
+        id
+      }
+    )
+  }
+
+
   return (
     <>
-      <div>
-        {/* public 아래 두면 최적화가 일어나지 않아서
-            보통 이미지 최적화를 위해 assets 아래 둔다. */}
-        <img src={getEmotionImage(1)} />
-        <img src={getEmotionImage(2)} />
-        <img src={getEmotionImage(3)} />
-        <img src={getEmotionImage(4)} />
-        <img src={getEmotionImage(5)} />
-      </div>
+      <button onClick={() => {
+        onCreate(
+          new Date().getTime(),
+          1, "Hello"
+        )
+      }}>일기추가테스트</button>
 
-          {/* public 아래 위치할 경우 아래처럼 url로 불러온다. */}
-          {/* <img src="/emotion1.png" /> */}
-      <div>
-        <Link to={"/"}>Home</Link>
-        <Link to={"/new"}>New</Link>
-        <Link to={"/diary"}>Diary</Link>
-      </div>
-      <button onClick={onClickButton}>New 페이지로 이동</button>
-      <Routes>
-        <Route path="/" element={<Home/>}></Route>
-        <Route path="/new" element={<New/>}></Route>
-        <Route path="/diary/:id" element={<Diary/>}></Route>
-        <Route path="*" element={<Notfound/>}></Route>
-      </Routes>
+      <button onClick={() => {
+        onUpdate(
+          1, new Date().getTime(),
+          3, "edited"
+        )
+      }}>일기수정테스트</button>
+      <button onClick={() => {
+        onDelete(1)
+      }}>일기삭제테스트</button>
+
+      <DiaryStateContext.Provider value={data}>
+        <DiaryDispatchContext.Provider value={{onCreate, onUpdate, onDelete}}>
+          <Routes>
+            <Route path="/" element={<Home />}></Route>
+            <Route path="/new" element={<New />}></Route>
+            <Route path="/diary/:id" element={<Diary />}></Route>
+            <Route path="/edit/:id" element={<Edit />}></Route>
+            <Route path="*" element={<Notfound />}></Route>
+          </Routes>
+        </DiaryDispatchContext.Provider>
+      </DiaryStateContext.Provider>
     </>
   )
 }

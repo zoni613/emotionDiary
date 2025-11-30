@@ -47,8 +47,6 @@ function App() {
 
   const [data, dispatch] = useReducer(reducer, mocData);
 
-  console.log(data)
-
   const idRef = useRef(3);
 
   // 새로운 일기 추가
@@ -92,23 +90,6 @@ function App() {
 
   return (
     <>
-      <button onClick={() => {
-        onCreate(
-          new Date().getTime(),
-          1, "Hello"
-        )
-      }}>일기추가테스트</button>
-
-      <button onClick={() => {
-        onUpdate(
-          1, new Date().getTime(),
-          3, "edited"
-        )
-      }}>일기수정테스트</button>
-      <button onClick={() => {
-        onDelete(1)
-      }}>일기삭제테스트</button>
-
       <DiaryStateContext.Provider value={data}>
         <DiaryDispatchContext.Provider value={{onCreate, onUpdate, onDelete}}>
           <Routes>
